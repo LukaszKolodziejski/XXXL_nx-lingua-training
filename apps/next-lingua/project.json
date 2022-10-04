@@ -1,0 +1,63 @@
+{
+  "name": "next-lingua",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/next-lingua",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "root": "apps/next-lingua",
+        "outputPath": "dist/apps/next-lingua"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/next-lingua"
+        },
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "next-lingua:build",
+        "dev": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "next-lingua:build:development",
+          "dev": true
+        },
+        "production": {
+          "buildTarget": "next-lingua:build:production",
+          "dev": false
+        }
+      }
+    },
+    "export": {
+      "executor": "@nrwl/next:export",
+      "options": {
+        "buildTarget": "next-lingua:build:production"
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/next-lingua"],
+      "options": {
+        "jestConfig": "apps/next-lingua/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/next-lingua/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": []
+}
