@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { initMocks } from '../mocks/index';
 import styles from './index.module.scss';
 import useSWR from 'swr';
-import { fetcher } from '../utils/fetcher';
+import fetch from '../libs/fetch';
 
 if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
   // initMocks(); // use only if mocking is needed
@@ -42,8 +42,8 @@ if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
 
 export function Index() {
   // export function Index({ data }) {
-  const { data, error } = useSWR('http://localhost:4200/users', fetcher);
-  // const { data, error } = useSWR('/api/words', fetcher);
+  const { data, error } = useSWR('http://localhost:4200/users', fetch);
+  // const { data, error } = useSWR('/api/words', fetch);
 
   // if (error) return <div>failed to load</div>;
   if (!data) return <div>loading...</div>;
