@@ -6,11 +6,13 @@ type ICtaNextStateVariant = 0 | 1 | 2 | 3;
 interface INextWordsProps {
   selectedWords: Array<IBaseSingleWord>;
   onNewWordsTrigger: () => void;
+  onEnglishTensesTrigger: () => void;
 }
 
 export const NextWords: FC<INextWordsProps> = ({
   selectedWords,
   onNewWordsTrigger,
+  onEnglishTensesTrigger,
 }) => {
   const [ctaNextState, setCtaNextState] = useState<ICtaNextStateVariant>(0);
 
@@ -21,6 +23,7 @@ export const NextWords: FC<INextWordsProps> = ({
   };
 
   useEffect(() => {
+    onEnglishTensesTrigger();
     if (ctaNextState === 3) {
       onNewWordsTrigger();
       setTimeout(() => {
