@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import useSWR from 'swr';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 import {
@@ -6,74 +8,143 @@ import {
   NextWords,
   ListeningSection,
   SpeakingSection,
+  EnglishTenses,
 } from '../screens/dashboard';
+import fetcher from '../libs/fetch';
+import type { IBaseSingleWord } from '../types';
 
-type Word = {
-  word: string;
-  series: number;
-  repeat_0_2: number;
-  repeat_0_5: number;
-  active: boolean;
-};
+type IApiWords = '/api/dev-words' | '/api/real-words';
 
-const selectedWordsHandler = (data: Array<Word>) => {
-  console.log(data);
-
-  const filteredWords = data.filter(
-    (word) => word.series === 0 || word.repeat_0_5 === 5
-  );
-  return filteredWords.slice(0, 3);
-};
+const API_URL: IApiWords = '/api/dev-words';
 
 // export function Dashboard({ Component, pageProps }: AppProps) {
-// export function Dashboard({ data }: Array<Word>) {
+// export function Dashboard({ data }: Array<IBaseSingleWord>) {
+export function Dashboard({ fallbackData }) {
+  const { data, mutate } = useSWR(API_URL, fetcher, { fallbackData });
+  console.log('fallback data');
+  console.log(data);
+  const [selectedWords, setSelectedWords] = useState(Array<IBaseSingleWord>);
+  const [englishTensesIndex, setEnglishTensesIndex] = useState(0);
 
-export function Dashboard({ data }) {
-  const [selectedWords, setSelectedWords] = useState(Array<Word>);
+  console.log('mutate data');
+  console.log(data);
 
-  // console.log(data);
+  const getRandomIndexHandler = (prevIndex): number => {
+    const range = 12;
+    let index = Math.floor(Math.random() * range);
+
+    do {
+      index = Math.floor(Math.random() * range);
+    } while (index === prevIndex);
+
+    return index;
+  };
+
   useEffect(() => {
-    // console.log('pageProps');
-    // console.log(pageProps);
-    //   const data = getServerSideProps();
-    //   console.log('data');
-    //   console.log(data);
-
-    setSelectedWords(selectedWordsHandler(data));
-  }, []);
+    // Development
+    // setSelectedWords(selectedWordsHandler(data.words));
+    //TODO: selectedWordsHandler2 -> work on 100%
+    setSelectedWords(selectedWordsHandler2(data.words));
+  }, [data]);
   console.log('selectedWords');
   console.log(selectedWords);
 
+  const newWordsTriggerHandler = async () => {
+    setEnglishTensesIndex(getRandomIndexHandler);
+    try {
+      await mutate(
+        fetcher(API_URL, {
+          method: 'PUT',
+          body: JSON.stringify(selectedWords),
+        })
+        //,
+        // {
+        // optimisticData: [...data, newTodo],
+        // rollbackOnError: true,
+        // populateCache: (newItem) => {
+
+        //   return [...data, newItem];
+        // },
+        // revalidate: true,
+        // }
+      );
+    } catch (e) {
+      console.log('error to mutate');
+    }
+  };
+
+  const selectedWordsHandler = (data: Array<IBaseSingleWord>) => {
+    const filteredWords = data.filter((word) => word.series === 0);
+    return filteredWords.slice(0, 3);
+  };
+
+  const getMultipleRandom = (arr: Array<IBaseSingleWord>, num: number) => {
+    if (arr.length) {
+      const shuffled = [...arr].sort(() => 0.5 - Math.random());
+
+      return shuffled.slice(0, num);
+    } else {
+      return [];
+    }
+  };
+
+  const selectedWordsHandler2 = (data: Array<IBaseSingleWord>) => {
+    const amountOfFilteredDataBySeries = [10, 6, 3];
+    const shuffledDataArray = amountOfFilteredDataBySeries.map(
+      (quantity, index) => {
+        const filteredDataArray: Array<IBaseSingleWord> = data.filter(
+          (el) => el.series === index
+        );
+        return getMultipleRandom(filteredDataArray, quantity);
+      }
+    );
+
+    const combinationOfMixedData = shuffledDataArray[0].concat(
+      shuffledDataArray[1],
+      shuffledDataArray[2]
+    );
+
+    const shuffledCombination = getMultipleRandom(
+      combinationOfMixedData,
+      combinationOfMixedData.length
+    );
+
+    return shuffledCombination.slice(0, 3);
+  };
+
   return (
-    <>
-      <main className="mx-4">
-        <div className="bg-green-500 p-5">Header</div>
-        {/* <div className="flex flex-row items-center justify-between bg-green-700"> */}
-        <div className="flex flex-row items-center bg-green-700">
-          <SpeakingSection />
-          <ListeningSection />
+    <div className="box-border relative">
+      <div className="bg-blue-400 p-5">
+        <Link href="/dashboard-real">
+          <a>NOW: {API_URL}</a>
+        </Link>
+      </div>
+      <div className="flex flex-row bg-blue-300">
+        <SpeakingSection />
+        <ListeningSection />
+        <EnglishTenses index={englishTensesIndex} />
+      </div>
 
-          <div className="bg-red-700">Eng Time</div>
-        </div>
-
-        {/* <div className="flex flex-row items-center justify-between bg-blue-200"> */}
-        <div className="grid grid-flow-col auto-cols-[4fr_2fr] bg-blue-200">
-          {/* TODO: types for Statistic | NextWords */}
-          <NextWords selectedWords={selectedWords} />
-          <Statistic data={data} />
-          {/* <div className="bg-yellow-500">Statistic</div> */}
-        </div>
-      </main>
-    </>
+      <div className="flex flex-row items-center justify-between bg-blue-200 rounded overflow-hidden mx-4">
+        <NextWords
+          selectedWords={selectedWords}
+          onNewWordsTrigger={newWordsTriggerHandler}
+        />
+        <Statistic data={data.words} />
+      </div>
+      <div className="text-xs text-sky-700 font-bold text-right pr-[120px] pt-2">
+        {` Daily Counter: ${data.counter.dailyCounter}`}
+      </div>
+    </div>
   );
 }
 
 export async function getServerSideProps() {
-  const res = await fetch(`http://localhost:4200/api/words`);
-  const data = await res.json();
-  // console.log('data ghghghghgh');
-  // console.log(data);
-  return { props: { data } };
+  const data = await fetcher(`http://localhost:4200${API_URL}`);
+
+  return {
+    props: { fallbackData: data },
+  };
 }
 
 export default Dashboard;
