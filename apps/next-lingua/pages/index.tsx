@@ -1,11 +1,71 @@
+import { useEffect } from 'react';
+import { initMocks } from '../mocks/index';
 import styles from './index.module.scss';
+import useSWR from 'swr';
+import fetch from '../libs/fetch';
+
+if (process.env.NEXT_PUBLIC_API_MOCKING === 'enabled') {
+  // initMocks(); // use only if mocking is needed
+}
+
+// export async function getServerSideProps() {
+//   // Fetch data from external API
+//   // const res = await fetch(`/api/reviews`);
+//   const res = await fetch(`http://localhost:4200/users`);
+//   const data = await res.json();
+//   console.log(data);
+//   // Pass data to the page via props
+//   // return { props: { data } };
+//   return { props: {} };
+// }
+
+// export function getServerSideProps() {
+//   const data = fetch(`http://localhost:4200/users`)
+//     .then((res) => res.json())
+//     .then((data) => {
+//       return data;
+//       console.log(data);
+//     });
+//   return {
+//     props: {
+//       data,
+//     },
+//   };
+// }
+
+// setInterval(() => {
+// fetch('http://localhost:4200/users').then((res) => {
+//   //  const users = await response.json();
+//   console.log(res.json());
+// });
+// }, 1000);
 
 export function Index() {
+  // export function Index({ data }) {
+  const { data, error } = useSWR('http://localhost:4200/users', fetch);
+  // const { data, error } = useSWR('/api/words', fetch);
+
+  // if (error) return <div>failed to load</div>;
+  if (!data) return <div>loading...</div>;
+  if (data) {
+    console.log(data);
+  }
+  // export function Index() {
   /*
    * Replace the elements below with your own.
    *
    * Note: The corresponding styles are in the ./index.scss file.
    */
+  // console.log(data);
+  //  const el = <div>{users[0].word}</div>;
+
+  // useEffect(() => {
+  //   fetch('http://localhost:4200/users').then((res) => {
+  //     //  const users = await response.json();
+  //     console.log(res.json());
+  //   });
+  // }, []);
+
   return (
     <div className={styles.page}>
       <div className="wrapper">
@@ -13,10 +73,10 @@ export function Index() {
           <div id="welcome">
             <h1>
               <span> Hello there, </span>
-              Welcome next-lingua 👋
+              Welcome next- lingua 👋
             </h1>
           </div>
-
+          {/* {el} */}
           <div id="hero" className="rounded">
             <div className="text-container">
               <h2>

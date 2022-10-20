@@ -12,6 +12,19 @@ const nextConfig = {
     // See: https://github.com/gregberge/svgr
     svgr: false,
   },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/dashboard',
+        permanent: true,
+      },
+    ];
+  },
+  i18n: {
+    locales: ['en-US'],
+    defaultLocale: 'en-US',
+  },
 };
 
 module.exports = withNx(nextConfig);

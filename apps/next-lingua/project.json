@@ -10,7 +10,8 @@
       "defaultConfiguration": "production",
       "options": {
         "root": "apps/next-lingua",
-        "outputPath": "dist/apps/next-lingua"
+        "outputPath": "dist/apps/next-lingua",
+        "assets": ["apps/next-lingua/public/mockServiceWorker.js"]
       },
       "configurations": {
         "development": {
