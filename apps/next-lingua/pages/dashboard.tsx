@@ -49,8 +49,11 @@ export function Dashboard({ fallbackData }) {
   console.log('selectedWords');
   console.log(selectedWords);
 
-  const newWordsTriggerHandler = async () => {
+  const englishTensesIndexHandler = () => {
     setEnglishTensesIndex(getRandomIndexHandler);
+  };
+
+  const newWordsTriggerHandler = async () => {
     try {
       await mutate(
         fetcher(API_URL, {
@@ -128,6 +131,7 @@ export function Dashboard({ fallbackData }) {
       <div className="flex flex-row items-center justify-between bg-blue-200 rounded overflow-hidden mx-4">
         <NextWords
           selectedWords={selectedWords}
+          onEnglishTensesTrigger={englishTensesIndexHandler}
           onNewWordsTrigger={newWordsTriggerHandler}
         />
         <Statistic data={data.words} />
