@@ -18,16 +18,12 @@ type IApiWords = '/api/dev-words' | '/api/real-words';
 const API_URL: IApiWords = '/api/dev-words';
 
 // export function Dashboard({ Component, pageProps }: AppProps) {
-// export function Dashboard({ data }: Array<IBaseSingleWord>) {
-export function Dashboard({ fallbackData }) {
-  const { data, mutate } = useSWR(API_URL, fetcher, { fallbackData });
-  console.log('fallback data');
-  console.log(data);
-  const [selectedWords, setSelectedWords] = useState(Array<IBaseSingleWord>);
+export function Dashboard() {
+  const { data, mutate } = useSWR(API_URL, fetcher);
+  const [selectedWords, setSelectedWords] = useState<Array<IBaseSingleWord>>(
+    []
+  );
   const [englishTensesIndex, setEnglishTensesIndex] = useState(0);
-
-  console.log('mutate data');
-  console.log(data);
 
   const getRandomIndexHandler = (prevIndex): number => {
     const range = 12;
@@ -44,13 +40,16 @@ export function Dashboard({ fallbackData }) {
     // Development
     // setSelectedWords(selectedWordsHandler(data.words));
     //TODO: selectedWordsHandler2 -> work on 100%
-    setSelectedWords(selectedWordsHandler2(data.words));
+    if (data) {
+      setSelectedWords(selectedWordsHandler2(data.words));
+    }
   }, [data]);
-  console.log('selectedWords');
-  console.log(selectedWords);
+
+  const englishTensesIndexHandler = () => {
+    setEnglishTensesIndex(getRandomIndexHandler);
+  };
 
   const newWordsTriggerHandler = async () => {
-    setEnglishTensesIndex(getRandomIndexHandler);
     try {
       await mutate(
         fetcher(API_URL, {
@@ -89,7 +88,7 @@ export function Dashboard({ fallbackData }) {
   };
 
   const selectedWordsHandler2 = (data: Array<IBaseSingleWord>) => {
-    const amountOfFilteredDataBySeries = [10, 6, 3];
+    const amountOfFilteredDataBySeries = [12, 5, 2];
     const shuffledDataArray = amountOfFilteredDataBySeries.map(
       (quantity, index) => {
         const filteredDataArray: Array<IBaseSingleWord> = data.filter(
@@ -129,22 +128,15 @@ export function Dashboard({ fallbackData }) {
         <NextWords
           selectedWords={selectedWords}
           onNewWordsTrigger={newWordsTriggerHandler}
+          onEnglishTensesTrigger={englishTensesIndexHandler}
         />
-        <Statistic data={data.words} />
+        <Statistic data={data?.words} />
       </div>
       <div className="text-xs text-sky-700 font-bold text-right pr-[120px] pt-2">
-        {` Daily Counter: ${data.counter.dailyCounter}`}
+        {` Daily Counter: ${data?.counter.dailyCounter}`}
       </div>
     </div>
   );
-}
-
-export async function getServerSideProps() {
-  const data = await fetcher(`http://localhost:4200${API_URL}`);
-
-  return {
-    props: { fallbackData: data },
-  };
 }
 
 export default Dashboard;
