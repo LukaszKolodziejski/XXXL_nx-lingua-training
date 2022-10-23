@@ -45,7 +45,7 @@ export const Statistic: FC<IStatisticProps> = ({ data }) => {
       series: index,
       words:
         index < 4
-          ? data.filter((el) => el.series === index).length
+          ? data?.filter((el) => el.series === index).length
           : diffDays * 12,
       fill: customColors[index],
     }));

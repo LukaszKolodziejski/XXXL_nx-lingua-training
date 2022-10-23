@@ -23,12 +23,13 @@ export const NextWords: FC<INextWordsProps> = ({
   };
 
   useEffect(() => {
-    onEnglishTensesTrigger();
     if (ctaNextState === 3) {
       onNewWordsTrigger();
       setTimeout(() => {
         ctaNextStateHandler();
       }, 1200);
+    } else {
+      onEnglishTensesTrigger();
     }
 
     //TODO: counter in CtaNext
