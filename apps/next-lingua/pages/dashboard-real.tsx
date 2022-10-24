@@ -88,8 +88,7 @@ export function Dashboard() {
   };
 
   const selectedWordsHandler = (data: Array<IBaseSingleWord>) => {
-    const amountOfFilteredDataBySeries = [12, 5, 2];
-    // const amountOfFilteredDataBySeries = [10, 6, 3];
+    const amountOfFilteredDataBySeries = [10, 6, 3];
     const shuffledDataArray = amountOfFilteredDataBySeries.map(
       (quantity, index) => {
         const filteredDataArray: Array<IBaseSingleWord> = data.filter(
