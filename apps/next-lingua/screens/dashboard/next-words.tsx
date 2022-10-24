@@ -5,31 +5,28 @@ type ICtaNextStateVariant = 0 | 1 | 2 | 3;
 
 interface INextWordsProps {
   selectedWords: Array<IBaseSingleWord>;
-  onNewWordsTrigger: () => void;
-  onEnglishTensesTrigger: () => void;
+  onFetchNewWordsTrigger: () => void;
+  onClickNextButton: () => void;
 }
 
 export const NextWords: FC<INextWordsProps> = ({
   selectedWords,
-  onNewWordsTrigger,
-  onEnglishTensesTrigger,
+  onClickNextButton,
+  onFetchNewWordsTrigger,
 }) => {
   const [ctaNextState, setCtaNextState] = useState<ICtaNextStateVariant>(0);
 
   const ctaNextStateHandler = () => {
-    setCtaNextState(
-      (prev) => (prev < 3 ? prev + 1 : 0) as ICtaNextStateVariant
-    );
+    onClickNextButton();
+    setCtaNextState((prev) => (prev + 1) as ICtaNextStateVariant);
   };
 
   useEffect(() => {
     if (ctaNextState === 3) {
-      onNewWordsTrigger();
+      onFetchNewWordsTrigger();
       setTimeout(() => {
-        ctaNextStateHandler();
+        setCtaNextState(0);
       }, 1200);
-    } else {
-      onEnglishTensesTrigger();
     }
 
     //TODO: counter in CtaNext
@@ -50,12 +47,19 @@ export const NextWords: FC<INextWordsProps> = ({
 
   //TODO: speechHandler -> utilitis
   const speechHandler = (word: string) => {
-    // const msg = new SpeechSynthesisUtterance(textContent);
     const msg = new SpeechSynthesisUtterance(word);
     msg.lang = 'en-US';
     msg.rate = 0.7;
     window.speechSynthesis.speak(msg);
   };
+
+  const borderColorsStyle = [
+    'border-[#1f77b4]',
+    'border-[#ff7f0e]',
+    'border-[#9467bd]',
+  ];
+
+  const bgColorsStyle = ['bg-[#1f77b444]', 'bg-[#ff7f0e44]', 'bg-[#9467bd44]'];
 
   return (
     <div className="flex flex-col w-full items-center">
@@ -78,18 +82,25 @@ export const NextWords: FC<INextWordsProps> = ({
       <div className="w-[500px] mb-7">
         {selectedWords.length ? (
           <div className="flex flex-row items-center justify-between min-w-[400px]">
-            {selectedWords?.map((wordData, index) => (
-              <button
-                key={`${wordData.word}-${index}`}
-                className="flex justify-center items-center w-[145px] h-10 bg-blue-300 rounded-[3px]"
-                onClick={() => {
-                  speechHandler(wordData.word);
-                  navigator.clipboard.writeText(wordData.word);
-                }}
-              >
-                {wordData.word}
-              </button>
-            ))}
+            {selectedWords
+              ?.map((wordData, index) => {
+                const borderColor = borderColorsStyle[wordData.series];
+                const bgColor = bgColorsStyle[wordData.series];
+
+                return (
+                  <button
+                    key={`${wordData.word}-${index}`}
+                    className={`flex justify-center items-center w-[145px] h-10 rounded-[3px] ${bgColor} ${borderColor} border-2`}
+                    onClick={() => {
+                      speechHandler(wordData.word);
+                      navigator.clipboard.writeText(wordData.word);
+                    }}
+                  >
+                    {wordData.word}
+                  </button>
+                );
+              })
+              .sort(() => 0.5 - Math.random())}
           </div>
         ) : (
           <div className="bg-red-300 rounded-[6px] text-center">

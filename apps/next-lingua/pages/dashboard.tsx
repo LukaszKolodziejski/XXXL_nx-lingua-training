@@ -24,6 +24,7 @@ export function Dashboard() {
     []
   );
   const [englishTensesIndex, setEnglishTensesIndex] = useState(0);
+  const [resetSpeakingSection, setResetSpeakingSection] = useState(false);
 
   const getRandomIndexHandler = (prevIndex): number => {
     const range = 12;
@@ -45,11 +46,18 @@ export function Dashboard() {
     }
   }, [data]);
 
-  const englishTensesIndexHandler = () => {
+  useEffect(() => {
+    if (resetSpeakingSection) {
+      setResetSpeakingSection(false);
+    }
+  }, [resetSpeakingSection]);
+
+  const clickNextButtonHandler = () => {
+    setResetSpeakingSection(true);
     setEnglishTensesIndex(getRandomIndexHandler);
   };
 
-  const newWordsTriggerHandler = async () => {
+  const fetchNewWordsTriggerHandler = async () => {
     try {
       await mutate(
         fetcher(API_URL, {
@@ -88,7 +96,7 @@ export function Dashboard() {
   };
 
   const selectedWordsHandler2 = (data: Array<IBaseSingleWord>) => {
-    const amountOfFilteredDataBySeries = [12, 5, 2];
+    const amountOfFilteredDataBySeries = [10, 6, 3];
     const shuffledDataArray = amountOfFilteredDataBySeries.map(
       (quantity, index) => {
         const filteredDataArray: Array<IBaseSingleWord> = data.filter(
@@ -119,7 +127,7 @@ export function Dashboard() {
         </Link>
       </div>
       <div className="flex flex-row bg-blue-300">
-        <SpeakingSection />
+        <SpeakingSection reset={resetSpeakingSection} />
         <ListeningSection />
         <EnglishTenses index={englishTensesIndex} />
       </div>
@@ -127,10 +135,13 @@ export function Dashboard() {
       <div className="flex flex-row items-center justify-between bg-blue-200 rounded overflow-hidden mx-4">
         <NextWords
           selectedWords={selectedWords}
-          onNewWordsTrigger={newWordsTriggerHandler}
-          onEnglishTensesTrigger={englishTensesIndexHandler}
+          onClickNextButton={clickNextButtonHandler}
+          onFetchNewWordsTrigger={fetchNewWordsTriggerHandler}
         />
-        <Statistic data={data?.words} />
+        <Statistic
+          data={data?.words}
+          dailyCounter={data?.counter.dailyCounter}
+        />
       </div>
       <div className="text-xs text-sky-700 font-bold text-right pr-[120px] pt-2">
         {` Daily Counter: ${data?.counter.dailyCounter}`}
