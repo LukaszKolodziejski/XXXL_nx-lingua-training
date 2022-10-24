@@ -4,13 +4,19 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from 'react-speech-recognition';
 
-export const SpeakingSection = () => {
+interface ISpeakingSectionProps {
+  reset: boolean;
+}
+
+export const SpeakingSection: FC<ISpeakingSectionProps> = ({ reset }) => {
   const [textContent, setTextContent] = useState('');
 
   const ref = useRef<HTMLParagraphElement>();
 
   const speechHandler = () => {
-    const msg = new SpeechSynthesisUtterance(ref.current.innerText);
+    const { innerText } = ref.current;
+    navigator.clipboard.writeText(innerText);
+    const msg = new SpeechSynthesisUtterance(innerText);
     msg.lang = 'en-US';
     msg.rate = 0.7;
     window.speechSynthesis.speak(msg);
@@ -19,9 +25,28 @@ export const SpeakingSection = () => {
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
   useEffect(() => {
-    console.log(transcript);
     setTextContent(transcript);
   }, [transcript]);
+
+  useEffect(() => {
+    if (reset) {
+      resetHandler();
+    }
+  }, [reset]);
+
+  const resetHandler = () => {
+    resetTranscript();
+    setTextContent('');
+  };
+
+  const speechRecognitionHandler = () => {
+    listening
+      ? SpeechRecognition.stopListening()
+      : SpeechRecognition.startListening({
+          continuous: true,
+          language: 'en-US',
+        });
+  };
 
   //TODO: add cn()
   const btnStyle = `w-20 rounded-[12px] border-2 mx-2 ${
@@ -34,24 +59,14 @@ export const SpeakingSection = () => {
         <p>Microphone: {listening ? 'on' : 'off'}</p>
         <button
           className="w-20 rounded-[12px] border-2 border-sky-700 mx-2"
-          onClick={() => {
-            listening
-              ? SpeechRecognition.stopListening()
-              : SpeechRecognition.startListening({
-                  continuous: true,
-                  language: 'en-US',
-                });
-          }}
+          onClick={speechRecognitionHandler}
         >
           {listening ? 'Stop' : 'Start'}
         </button>
         <button
           className={btnStyle}
           disabled={!textContent}
-          onClick={() => {
-            resetTranscript();
-            setTextContent('');
-          }}
+          onClick={resetHandler}
         >
           Reset
         </button>
